@@ -172,11 +172,18 @@ public class LexicalAnalyzer {
         char c = advance();
 
         switch (c) {
-            case '(': {
-                // Puede ser '(' o '(Int)' (cast)
-                // TODO: implementar reconocimiento de cast (Int)
-                return new Token(TokenType.LPAREN, "(", startLine, startColumn);
+            case '(':
+                if (peekNext(0) == 'I' &&
+                peekNext(1) == 'n' &&
+                peekNext(2) == 't' &&
+                peekNext(3) == ')') {
+                advance(); // consume I
+                advance(); // consume n
+                advance(); // consume t
+                advance(); // consume )
+                return new Token(TokenType.CAST_INT, "(Int)", startLine, startColumn);
             }
+                return new Token(TokenType.LPAREN, "(", startLine, startColumn);
             case ')': return makeToken(TokenType.RPAREN,   ")");
             case '{': return makeToken(TokenType.LBRACE,   "{");
             case '}': return makeToken(TokenType.RBRACE,   "}");
@@ -292,7 +299,11 @@ public class LexicalAnalyzer {
         if (actual_pos + 1 >= source.length()) return '\0';
         return source.charAt(actual_pos + 1);
     }
-
+    //igual al next pero le podes mandar posiciones ----!!!
+    private char peekNext(int offset) {
+        if (actual_pos + offset >= source.length()) return '\0';
+        return source.charAt(actual_pos + offset);
+    }
     private char advance() {
         char c = source.charAt(actual_pos);
         actual_pos++;
