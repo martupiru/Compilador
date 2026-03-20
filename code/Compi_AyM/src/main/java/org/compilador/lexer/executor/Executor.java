@@ -1,8 +1,8 @@
-package org.compilador.executor;
+package org.compilador.lexer.executor;
 import org.compilador.exception.LexicalException;
-import org.compilador.lexer.LexicalAnalyzer;
-import org.compilador.token.Token;
-import org.compilador.token.TokenType;
+import org.compilador.lexer.lexicalAnalyzer.LexicalAnalyzer;
+import org.compilador.lexer.token.Token;
+import org.compilador.lexer.token.TokenType;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -13,7 +13,7 @@ public class Executor {
 
    public static void main(String[] args) {
 
-       String sourceFile = "/home/aida/Documentos/Compi/prueba.txt";
+       String sourceFile = "C:/Users/Usuario/Documents/MARTI/prueba compi.txt";
        String outputFile = null;
 
        String source = readSourceFile(sourceFile);

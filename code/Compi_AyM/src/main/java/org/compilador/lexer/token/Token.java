@@ -1,4 +1,4 @@
-package org.compilador.token;
+package org.compilador.lexer.token;
 
 public class Token {
 

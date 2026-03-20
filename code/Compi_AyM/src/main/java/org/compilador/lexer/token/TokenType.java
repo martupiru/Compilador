@@ -1,4 +1,4 @@
-package org.compilador.token;
+package org.compilador.lexer.token;
 
 public enum TokenType {
 
@@ -27,11 +27,12 @@ public enum TokenType {
     TYPE_BOOL,
     TYPE_VOID,
     TYPE_ARRAY,
+    TYPE_IO, //IO : (IO.out_str("hola mundo"))
 
     //Identificadores
     ID_CLASS,       //empieza con MAYUSCULA
     ID_MET_AT,      //empieza con minuscula
-    ID_START,
+    ID_START, //palabra start
 
     //Literales
     LIT_INT,

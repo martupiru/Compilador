@@ -1,8 +1,8 @@
-package org.compilador.lexer;
+package org.compilador.lexer.lexicalAnalyzer;
 
 import org.compilador.exception.LexicalException;
-import org.compilador.token.Token;
-import org.compilador.token.TokenType;
+import org.compilador.lexer.token.Token;
+import org.compilador.lexer.token.TokenType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +28,14 @@ public class LexicalAnalyzer {
         KEYWORDS.put("false",  TokenType.KW_FALSE);
         KEYWORDS.put("nil",    TokenType.KW_NIL);
         KEYWORDS.put("div",    TokenType.KW_DIV);
+        // TIPOS PRIMITIVOS
+        KEYWORDS.put("Int",   TokenType.TYPE_INT);
+        KEYWORDS.put("Str",   TokenType.TYPE_STR);
+        KEYWORDS.put("Bool",  TokenType.TYPE_BOOL);
+        //TIPOS ESPECIALES
+        KEYWORDS.put("void",  TokenType.TYPE_VOID);
+        KEYWORDS.put("Array", TokenType.TYPE_ARRAY);
+        KEYWORDS.put("IO",    TokenType.TYPE_IO);
     }
 
     private final String source;
@@ -84,6 +92,11 @@ public class LexicalAnalyzer {
         TokenType type = KEYWORDS.get(word);
         if (type != null) {
             return new Token(type, word, startLine, startColumn);
+        }
+
+        // Identificador especial: start
+        if (word.equals("start")) {
+            return new Token(TokenType.ID_START, word, startLine, startColumn);
         }
 
         // Identificador de clase (empieza con Mayuscula)
