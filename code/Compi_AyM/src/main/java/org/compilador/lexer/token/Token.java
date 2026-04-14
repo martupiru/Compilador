@@ -17,7 +17,7 @@ public class Token {
     public TokenType getType()  { return type;   }
     public String getLexema()   { return lexema; }
     public int getLine()        { return line;   }
-    public int getColum()      { return colum; }
+    public int getColumn()      { return colum; }
 
     /*
      | TOKEN | LEXEMA | LINEA N (COLUMNA C) |

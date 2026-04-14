@@ -185,35 +185,24 @@ public class LexicalAnalyzer {
         char c = advance();
 
         switch (c) {
-            case '(':
-                if (peekNext(0) == 'I' &&
-                peekNext(1) == 'n' &&
-                peekNext(2) == 't' &&
-                peekNext(3) == ')') {
-                advance(); // consume I
-                advance(); // consume n
-                advance(); // consume t
-                advance(); // consume )
-                return new Token(TokenType.CAST_INT, "(Int)", startLine, startColumn);
-            }
-                return new Token(TokenType.LPAREN, "(", startLine, startColumn);
-            case ')': return makeToken(TokenType.RPAREN,   ")");
-            case '{': return makeToken(TokenType.LBRACE,   "{");
-            case '}': return makeToken(TokenType.RBRACE,   "}");
-            case '[': return makeToken(TokenType.LBRACKET, "[");
-            case ']': return makeToken(TokenType.RBRACKET, "]");
-            case ';': return makeToken(TokenType.SEMICOLON, ";");
-            case ',': return makeToken(TokenType.COMMA,     ",");
-            case '.': return makeToken(TokenType.DOT,       ".");
-            case ':': return makeToken(TokenType.COLON,     ":");
+            case '(': return makeToken(TokenType.IPAREN, "(");
+            case ')': return makeToken(TokenType.DPAREN,   ")");
+            case '{': return makeToken(TokenType.ILLAVE,   "{");
+            case '}': return makeToken(TokenType.DLLAVE,   "}");
+            case '[': return makeToken(TokenType.ICORCHETE, "[");
+            case ']': return makeToken(TokenType.DCORCHETE, "]");
+            case ';': return makeToken(TokenType.PUNTOCOMA, ";");
+            case ',': return makeToken(TokenType.COMA,     ",");
+            case '.': return makeToken(TokenType.PUNTO,       ".");
+            case ':': return makeToken(TokenType.DOSPUNTOS,     ":");
 
             case '+':
                 if (!isEOF() && peek() == '+') { advance(); return new Token(TokenType.OP_INC, "++", startLine, startColumn); }
-                return new Token(TokenType.OP_PLUS,  "+", startLine, startColumn);
+                return new Token(TokenType.OP_SUM,  "+", startLine, startColumn);
 
             case '-':
                 if (!isEOF() && peek() == '-') { advance(); return new Token(TokenType.OP_DEC, "--", startLine, startColumn); }
-                return new Token(TokenType.OP_MINUS, "-", startLine, startColumn);
+                return new Token(TokenType.OP_REST, "-", startLine, startColumn);
 
             case '*': return new Token(TokenType.OP_MULT, "*", startLine, startColumn);
             case '/': return new Token(TokenType.OP_DIV,  "/", startLine, startColumn);
@@ -228,7 +217,7 @@ public class LexicalAnalyzer {
 
             case '=':
                 if (!isEOF() && peek() == '=') { advance(); return new Token(TokenType.OP_EQUAL,  "==", startLine, startColumn); }
-                return new Token(TokenType.ASSIGN, "=", startLine, startColumn);
+                return new Token(TokenType.ASIGN, "=", startLine, startColumn);
 
             case '!':
                 if (!isEOF() && peek() == '=') { advance(); return new Token(TokenType.OP_NOT_EQUAL, "!=", startLine, startColumn); }

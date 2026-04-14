@@ -42,8 +42,8 @@ public enum TokenType {
     LIT_FALSE,
 
     //Operadores aritmeticos
-    OP_PLUS,        // +
-    OP_MINUS,       // -
+    OP_SUM,        // +
+    OP_REST,       // -
     OP_MULT,        // *
     OP_DIV,         // /
     OP_INC,         // ++
@@ -57,30 +57,25 @@ public enum TokenType {
     OP_EQUAL,
     OP_NOT_EQUAL,
 
-    //Casteo
-    //!!!!!!!!!!!!! ⟨OpUnario⟩ ::= + | - | ! | ++ | -- | (Int)
-    //Preguntar si va aca
-    CAST_INT,       // (Int)
-
     //Operadores logicos
     OP_AND,         // &&
     OP_OR,          // ||
     OP_NOT,         // !
 
     //Asignacion
-    ASSIGN,         // =
+    ASIGN,         // =
 
     //Puntuacion y delimitadores
-    LPAREN,         // (
-    RPAREN,         // )
-    LBRACE,         // {
-    RBRACE,         // }
-    LBRACKET,       // [
-    RBRACKET,       // ]
-    SEMICOLON,      // ;
-    COMMA,          // ,
-    DOT,            // .
-    COLON,          // :
+    IPAREN,         // (
+    DPAREN,         // )
+    ILLAVE,         // {
+    DLLAVE,         // }
+    ICORCHETE,       // [
+    DCORCHETE,       // ]
+    PUNTOCOMA,      // ;
+    COMA,          // ,
+    PUNTO,            // .
+    DOSPUNTOS,          // :
 
     //Fin de archivo
     EOF
