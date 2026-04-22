@@ -246,6 +246,370 @@ public class SyntacticAnalyzer {
             tipoPrimitivo();
         }
     }
+    public void sentencia(){
+        if (current()==TokenType.PUNTOCOMA){
+            match(TokenType.PUNTOCOMA);
+        } else if (current()==TokenType.KW_IF) {
+            match(TokenType.KW_IF);
+            match(TokenType.IPAREN);
+            expresion();
+            match(TokenType.DPAREN);
+            sentenciaElseFact();
+        }else if(current()==TokenType.KW_WHILE){
+            match(TokenType.KW_WHILE);
+            match(TokenType.IPAREN);
+            expresion();
+            match(TokenType.DPAREN);
+            sentencia();
+        }else if (current()==TokenType.KW_FOR){
+            match(TokenType.KW_FOR);
+            match(TokenType.IPAREN);
+            tipoPrimitivo();
+            match(TokenType.ID_MET_AT);
+            match(TokenType.KW_IN);
+            match(TokenType.ID_MET_AT);
+            match(TokenType.DPAREN);
+            sentencia();
+        }else if(current()==TokenType.KW_RET){
+            match(TokenType.KW_RET);
+            expresionFact();
+            match(TokenType.PUNTOCOMA);
+          //primeros de asignacion
+        } else if (current()==TokenType.ID_MET_AT ||current()== TokenType.KW_SELF) {
+            asignacion();
+            match(TokenType.PUNTOCOMA);
+        } else if (current()==TokenType.IPAREN) {
+            sentenciaSimple();
+            match(TokenType.PUNTOCOMA);
+        } else if (current()==TokenType.ILLAVE) {
+            bloque();
+        }//else {
+           // throw new SyntacticException(
+             //       "Se esperaba ':' o '{', se encontro " + current(),
+               //     currentToken.getLine(), currentToken.getColumn()
+            //);}
+            //!!!!!!!!!!!!!poner error
+
+    }
+    public void expresionFact() {
+        if(esPrimeroExpresion()) {
+            expresion();
+        }//no hay error en el else pq acepta lambda
+    }
+
+    public void sentenciaElseFact(){
+        if(current()==TokenType.KW_ELSE){
+            match(TokenType.KW_ELSE);
+            sentencia();
+        }//no hay error pq hacepta lambda
+    }
+    public void bloque(){
+        match(TokenType.ILLAVE);
+        nSentencia();
+        match(TokenType.DLLAVE);
+    }
+    public void asignacion(){
+        if (current()==TokenType.ID_MET_AT){
+            accesoVarSimple();
+            match(TokenType.ASIGN);
+            expresion();
+        }else if(current()==TokenType.KW_SELF){
+            accesoSelfSimple();
+            match(TokenType.ASIGN);
+            expresion();
+        }else{
+            Exception//!!!!!!!!!!!!!!!
+        }
+    }
+    public void accesoVarSimple(){
+        match(TokenType.ID_MET_AT);
+        accesoVarSimpleFact();
+    }
+    // <AccesoVar-Simple-Fact> ::= <NEncadenado-Simple>
+    //                           | [ <Expresion> ]
+    // PRIMEROS: . [ lambda   SIGUIENTES: =
+    // ================================================================
+    public void accesoVarSimpleFact() {
+        if (current() == TokenType.ICORCHETE) {
+            match(TokenType.ICORCHETE);
+            expresion();
+            match(TokenType.DCORCHETE);
+        } else {
+            nEncadenadoSimple();
+        }
+    }
+    // ================================================================
+    // <AccesoSelf-Simple> ::= self <NEncadenado-Simple>
+    // ================================================================
+    public void accesoSelfSimple() {
+        match(TokenType.KW_SELF);
+        nEncadenadoSimple();
+    }
+    // ================================================================
+    // <NEncadenado-Simple> ::= <Encadenado-Simple> <NEncadenado-Simple> | Empty
+    // PRIMEROS: . lambda   SIGUIENTES: =
+    // ================================================================
+    public void nEncadenadoSimple() {
+        if (current() == TokenType.PUNTO) {
+            encadenadoSimple();
+            nEncadenadoSimple();
+        }
+        // lambda
+    }
+    // ================================================================
+    // <Encadenado-Simple> ::= . id
+    // ================================================================
+    public void encadenadoSimple() {
+        match(TokenType.PUNTO);
+        match(TokenType.ID_MET_AT);
+    }
+    public void sentenciaSimple() {
+        match(TokenType.IPAREN);
+        expresion();
+        match(TokenType.DPAREN);
+    }
+///EXPRESION
+//OPERADORES
+public void opIgual() {
+    if (current() == TokenType.OP_EQUAL) {
+        match(TokenType.OP_EQUAL);
+    } else if (current() == TokenType.OP_NOT_EQUAL) {
+        match(TokenType.OP_NOT_EQUAL);
+    } else {
+        throw new SyntacticException(
+                "Se esperaba == o !=, se encontro " + current(),
+                currentToken.getLine(), currentToken.getColumn()
+        );
+    }
+}
+
+    public void opCompuesto() {
+        if (current() == TokenType.OP_LESS) {
+            match(TokenType.OP_LESS);
+        } else if (current() == TokenType.OP_GREATER) {
+            match(TokenType.OP_GREATER);
+        } else if (current() == TokenType.OP_LESS_EQ) {
+            match(TokenType.OP_LESS_EQ);
+        } else if (current() == TokenType.OP_GREATER_EQ) {
+            match(TokenType.OP_GREATER_EQ);
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba operador compuesto (<, >, <=, >=), se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+    public void opAd() {
+        if (current() == TokenType.OP_SUM) {
+            match(TokenType.OP_SUM);
+        } else if (current() == TokenType.OP_REST) {
+            match(TokenType.OP_REST);
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba + o -, se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+
+    public void opUnario() {
+        if (current() == TokenType.OP_SUM) {
+            match(TokenType.OP_SUM);
+        } else if (current() == TokenType.OP_REST) {
+            match(TokenType.OP_REST);
+        } else if (current() == TokenType.OP_NOT) {
+            match(TokenType.OP_NOT);
+        } else if (current() == TokenType.OP_INC) {
+            match(TokenType.OP_INC);
+        } else if (current() == TokenType.OP_DEC) {
+            match(TokenType.OP_DEC);
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba operador unario (+,-,!,++,--), se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+
+    public void opMul() {
+        if (current() == TokenType.OP_MULT) {
+            match(TokenType.OP_MULT);
+        } else if (current() == TokenType.OP_DIV) {
+            match(TokenType.OP_DIV);
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba * o /, se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+    public void operando() {
+        if (esLiteral()) {
+            literal();
+        } else if (esPrimeroPrimario()) {
+            primario();
+            encadenadoEmpty();
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba un operando, se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+
+    // <Literal> ::= nil | true | false | intLiteral | StrLiteral
+    public void literal() {
+        if (current() == TokenType.KW_NIL) {
+            match(TokenType.KW_NIL);
+        } else if (current() == TokenType.KW_TRUE) {
+            match(TokenType.KW_TRUE);
+        } else if (current() == TokenType.KW_FALSE) {
+            match(TokenType.KW_FALSE);
+        } else if (current() == TokenType.LIT_INT) {
+            match(TokenType.LIT_INT);
+        } else if (current() == TokenType.LIT_STR) {
+            match(TokenType.LIT_STR);
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba un literal, se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+    // ================================================================
+    // <Primario> ::= <ExpresionParentizada> | <AccesoSelf> | <AccesoVar>
+    //              | <Llamada-Metodo> | <Llamada-Metodo-Estatico> | <Llamada-Constructor>
+    // PRIMEROS: (, self, id, idclass, new
+    // ================================================================
+    public void primario() {
+        if (current() == TokenType.IPAREN) {
+            expresionParentizada();
+        } else if (current() == TokenType.KW_SELF) {
+            accesoSelf();
+        } else if (current() == TokenType.ID_CLASS) {
+            llamadaMetodoEstatico();
+        } else if (current() == TokenType.KW_NEW) {
+            llamadaConstructor();
+        } else if (current() == TokenType.ID_MET_AT) {
+            // id -> AccesoVar o Llamada-Metodo segun lo que siga
+            //OJOOOOOOOOOOOOOO ACAAAAAAAAAA REVISAR Q PASA
+            accesoVarOLlamadaMetodo();
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba primario, se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+
+    public void expresionParentizada() {
+        match(TokenType.IPAREN);
+        expresion();
+        match(TokenType.DPAREN);
+        encadenadoEmpty();
+    }
+
+    // <AccesoSelf> ::= self <Encadenado-Empty>
+    public void accesoSelf() {
+        match(TokenType.KW_SELF);
+        encadenadoEmpty();
+    }
+    public void accesoVarFact() {
+        if (current() == TokenType.ICORCHETE) {
+            // produccion: [ <Expresion> ] <Encadenado-Empty>
+            match(TokenType.ICORCHETE);
+            expresion();
+            match(TokenType.DCORCHETE);
+            encadenadoEmpty();
+        } else if (current() == TokenType.PUNTO) {
+            // produccion: <Encadenado>
+            encadenado();
+        }
+        // sin else si es alguno de esos, lambda, salimos
+    }
+
+    // <Llamada-Metodo-Estatico> ::= idclass . <Llamada-Metodo> <Encadenado-Empty>
+    public void llamadaMetodoEstatico() {
+        match(TokenType.ID_CLASS);
+        match(TokenType.PUNTO);
+        llamadaMetodo();
+        encadenadoEmpty();
+    }
+
+    // <Llamada-Metodo> ::= id <Argumentos-Actuales> <Encadenado-Empty>
+    public void llamadaMetodo() {
+        match(TokenType.ID_MET_AT);
+        argumentosActuales();
+        encadenadoEmpty();
+    }
+
+    // <Llamada-Constructor> ::= new <Llamada-Constructor-Fact>
+    public void llamadaConstructor() {
+        match(TokenType.KW_NEW);
+        llamadaConstructorFact();
+    }
+    // ================================================================
+    // <Llamada-Constructor-Fact> ::= <Tipo-Primitivo> [ <Expresion> ]
+    //                              | idclass <Argumentos-Actuales> <Encadenado-Empty>
+    // PRIMEROS: Str, Bool, Int, idclass
+    // ================================================================
+    public void llamadaConstructorFact() {
+        if (current() == TokenType.ID_CLASS) {
+            match(TokenType.ID_CLASS);
+            argumentosActuales();
+            encadenadoEmpty();
+        } else if (esTipoPrimitivo()) {
+            tipoPrimitivo();
+            match(TokenType.ICORCHETE);
+            expresion();
+            match(TokenType.DCORCHETE);
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba idclass o tipo primitivo despues de 'new', se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+    // <Argumentos-Actuales> ::= ( <Lista-Expresiones> ) | ()
+    public void argumentosActuales() {
+        match(TokenType.IPAREN);
+        if (esPrimeroExpresion()) {
+            listaExpresiones();
+        }
+        match(TokenType.DPAREN);
+    }
+
+    // <Lista-Expresiones> ::= <Expresion> <Lista-Expresiones-Fact>
+    public void listaExpresiones() {
+        expresion();
+        listaExpresionesFact();
+    }
+
+    // <Lista-Expresiones-Fact> ::= , <Lista-Expresiones> | Empty
+    // PRIMEROS: , lambda   SIGUIENTES: )
+    public void listaExpresionesFact() {
+        if (current() == TokenType.COMA) {
+            match(TokenType.COMA);
+            listaExpresiones();
+        }
+        // lambda
+    }
+    // <Encadenado> ::= . <Encadenado-Fact>
+    public void encadenado() {
+        match(TokenType.PUNTO);
+        encadenadoFact();
+    }
+
+    // <Encadenado-Empty> ::= <Encadenado> | Empty
+    // PRIMEROS: . lambda
+    public void encadenadoEmpty() {
+        if (current() == TokenType.PUNTO) {
+            encadenado();
+        }
+        // lambda
+    }
+
+
     // <Impl> ::= impl idclass { <NMiembro> }
     // PRIMEROS: impl
     public void implDef() {
@@ -396,15 +760,6 @@ public class SyntacticAnalyzer {
                     "Se esperaba un miembro (fn, st o '.'), se encontro " + current(),
                     currentToken.getLine(), currentToken.getColumn()
             );
-        }
-    }
-    public void sentencia(){
-        if(current()==TokenType.PUNTOCOMA){
-            match(TokenType.PUNTOCOMA);
-        } else if (current()==TokenType.ID) {
-
-        } else if () {
-
         }
     }
     public void atributo() {
