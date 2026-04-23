@@ -1398,8 +1398,11 @@ public class SyntacticAnalyzer {
      * - <Lista-Declaracion-Variables-Fact> ::= , <Lista-Declaracion-Variables> | Empty -
      */
     public void listaDeclaracionVariablesFact() throws LexicalException, SyntacticException {
-        match(TokenType.COMA);
-        listaDeclaracionVariables();
+        if (current()==TokenType.COMA){
+            match(TokenType.COMA);
+            listaDeclaracionVariables();
+        }
+
     }
 
     /**

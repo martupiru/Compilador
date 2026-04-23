@@ -33,7 +33,7 @@ public class ExecutorSyntactic {
             return e.formatError();
 
         } catch (SyntacticException e) {
-            return "ERROR SINTACTICO: " + e.getMessage();
+            return e.formatError();
         }
     }
 
