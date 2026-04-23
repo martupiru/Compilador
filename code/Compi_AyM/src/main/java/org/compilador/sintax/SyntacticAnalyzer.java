@@ -369,6 +369,147 @@ public class SyntacticAnalyzer {
         match(TokenType.DPAREN);
     }
 ///EXPRESION
+public void expresion() {
+    expOr();
+}
+
+    // <ExpOr> ::= <ExpAnd> <ExpOrRec>
+    public void expOr() {
+        expAnd();
+        expOrRec();
+    }
+
+    // <ExpOrRec> ::= || <ExpAnd> <ExpOrRec> | Empty
+    // PRIMEROS: || lambda   SIGUIENTES: ) ; ] ,
+    public void expOrRec() {
+        if (current() == TokenType.OP_OR) {
+            match(TokenType.OP_OR);
+            expAnd();
+            expOrRec();
+        }
+        // lambda
+    }
+
+    // <ExpAnd> ::= <ExpIgual> <ExpAndRec>
+    public void expAnd() {
+        expIgual();
+        expAndRec();
+    }
+
+    // <ExpAndRec> ::= && <ExpIgual> <ExpAndRec> | Empty
+    // PRIMEROS: && lambda   SIGUIENTES: ) ; ] , ||
+    public void expAndRec() {
+        if (current() == TokenType.OP_AND) {
+            match(TokenType.OP_AND);
+            expIgual();
+            expAndRec();
+        }
+        // lambda
+    }
+    // <ExpIgual> ::= <ExpCompuesta> <ExpIgualRec>
+    public void expIgual() {
+        expCompuesta();
+        expIgualRec();
+    }
+
+    // <ExpIgualRec> ::= <OpIgual> <ExpCompuesta> <ExpIgualRec> | Empty
+    // PRIMEROS: == != lambda   SIGUIENTES: ) ; ] , || &&
+    public void expIgualRec() {
+        if (current() == TokenType.OP_EQUAL || current() == TokenType.OP_NOT_EQUAL) {
+            opIgual();
+            expCompuesta();
+            expIgualRec();
+        }
+        // lambda
+    }
+
+    // ================================================================
+    // <ExpCompuesta> ::= <ExpAd> <OpCompuesto> <ExpAd>
+    //                  | <ExpAd>
+    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+    // ================================================================
+    public void expCompuesta() {
+        expAd();
+        if (current() == TokenType.OP_LESS       ||
+                current() == TokenType.OP_GREATER    ||
+                current() == TokenType.OP_LESS_EQ    ||
+                current() == TokenType.OP_GREATER_EQ) {
+            opCompuesto();
+            expAd();
+        }
+        // si no hay opCompuesto -> produccion <ExpAd> sola, salimos
+    }
+
+    // ================================================================
+    // <ExpAd> ::= <ExpMul> <ExpAdRec>
+    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+    // ================================================================
+    public void expAd() {
+        expMul();
+        expAdRec();
+    }
+
+    // ================================================================
+    // <ExpAdRec> ::= <OpAd> <ExpMul> <ExpAdRec> | Empty
+    // PRIMEROS: + - lambda
+    // SIGUIENTES: < > <= >= ) ; ] , || && == !=
+    // ================================================================
+    public void expAdRec() {
+        if (current() == TokenType.OP_SUM || current() == TokenType.OP_REST) {
+            opAd();
+            expMul();
+            expAdRec();
+        }
+        // lambda
+    }
+
+    // ================================================================
+    // <ExpMul> ::= <ExpUn> <ExpMulRec>
+    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+    // ================================================================
+    public void expMul() {
+        expUn();
+        expMulRec();
+    }
+
+    // ================================================================
+    // <ExpMulRec> ::= <OpMul> <ExpUn> <ExpMulRec> | Empty
+    // PRIMEROS: * / lambda
+    // SIGUIENTES: < > <= >= ) ; ] , || && == !=
+    // ================================================================
+    public void expMulRec() {
+        if (current() == TokenType.OP_MULT || current() == TokenType.OP_DIV) {
+            opMul();
+            expUn();
+            expMulRec();
+        }
+        // lambda
+    }
+
+    // ================================================================
+    // <ExpUn> ::= <OpUnario> <ExpUn> | <Operando>
+    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+    // ================================================================
+    public void expUn() {
+        if (current() == TokenType.OP_SUM  ||
+                current() == TokenType.OP_REST ||
+                current() == TokenType.OP_NOT   ||
+                current() == TokenType.OP_INC   ||
+                current() == TokenType.OP_DEC) {
+            opUnario();
+            expUn();
+        } else if (esLiteral() || esPrimeroPrimario()) {
+            operando();
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba expresion unaria u operando, se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+
+
+
 //OPERADORES
 public void opIgual() {
     if (current() == TokenType.OP_EQUAL) {
@@ -501,6 +642,20 @@ public void opIgual() {
             );
         }
     }
+    public void accesoVarOLlamadaMetodo() {
+        match(TokenType.ID_MET_AT);
+        if (current() == TokenType.IPAREN) {
+            // <Llamada-Metodo> -> id <Argumentos-Actuales> <Encadenado-Empty>
+            argumentosActuales();
+            encadenadoEmpty();
+        } else if (current()==TokenType.PUNTO || current()==TokenType.ICORCHETE) {
+            accesoVarFact();
+        }else {
+            error
+        }
+    }
+
+
 
     public void expresionParentizada() {
         match(TokenType.IPAREN);
@@ -524,8 +679,9 @@ public void opIgual() {
         } else if (current() == TokenType.PUNTO) {
             // produccion: <Encadenado>
             encadenado();
+        }else{
+            error
         }
-        // sin else si es alguno de esos, lambda, salimos
     }
 
     // <Llamada-Metodo-Estatico> ::= idclass . <Llamada-Metodo> <Encadenado-Empty>
@@ -599,6 +755,28 @@ public void opIgual() {
         match(TokenType.PUNTO);
         encadenadoFact();
     }
+
+    // <Encadenado-Fact> ::= <Llamada-Metodo-Encadenado> | <Acceso-Var>
+    // Ambos empiezan con id entonces aca hicimos dos reglas: EncadenadoFact y LlamadaMetodoEncadenado
+    public void encadenadoFact() {
+        if (current() == TokenType.ID_MET_AT) {
+            match(TokenType.ID_MET_AT);
+            //Por LlamadaMetodoEncadenado debemos esperar un (
+            if (current()==TokenType.IPAREN){
+                argumentosActuales();
+                encadenadoEmpty();
+            //Por AccesoVar esperamos un . o [
+            } else if (current()==TokenType.ICORCHETE ||current()==TokenType.PUNTO ) {
+                accesoVarFact();
+            }
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba id despues de '.', se encontro " + current(),
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
+    }
+
 
     // <Encadenado-Empty> ::= <Encadenado> | Empty
     // PRIMEROS: . lambda
