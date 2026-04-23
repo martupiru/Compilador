@@ -344,6 +344,7 @@ public class SyntacticAnalyzer {
             match(TokenType.IPAREN);
             expresion();
             match(TokenType.DPAREN);
+            sentencia();
             sentenciaElseFact();
         }else if(current()==TokenType.KW_WHILE){
             match(TokenType.KW_WHILE);
@@ -951,14 +952,8 @@ public class SyntacticAnalyzer {
             // <Llamada-Metodo> -> id <Argumentos-Actuales> <Encadenado-Empty>
             argumentosActuales();
             encadenadoEmpty();
-        } else if (current()==TokenType.PUNTO || current()==TokenType.ICORCHETE) {
-            accesoVarFact();
         } else {
-            throw new SyntacticException(
-                    "Se esperaba '(', '.' o '[' despues de id, se encontro " + current()
-                            + " ('" + currentToken.getLexema() + "')",
-                    currentToken.getLine(), currentToken.getColumn()
-            );
+            accesoVarFact();
         }
     }
 
@@ -1003,15 +998,9 @@ public class SyntacticAnalyzer {
             expresion();
             match(TokenType.DCORCHETE);
             encadenadoEmpty();
-        } else if (current() == TokenType.PUNTO) {
-            // produccion: <Encadenado>
-            encadenado();
         } else {
-            throw new SyntacticException(
-                    "Se esperaba '.' o '[' en acceso a variable, se encontro " + current()
-                            + " ('" + currentToken.getLexema() + "')",
-                    currentToken.getLine(), currentToken.getColumn()
-            );
+            // produccion: <EncadenadoEmpty>
+            encadenadoEmpty();
         }
     }
 

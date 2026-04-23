@@ -42,6 +42,9 @@ public class LexicalAnalyzer {
     private int actual_pos;
     private int actual_line;
     private int actual_colum;
+    //para no tener columnas en negativo
+    private int lastValidLine   = 1;
+    private int lastValidColumn = 1;
 
     public LexicalAnalyzer(String source) {
         this.source = source; //archivo
@@ -53,7 +56,7 @@ public class LexicalAnalyzer {
         skipWhitespaceAndComments();
 
         if (isEOF()) {
-            return makeToken(TokenType.EOF, "EOF");
+            return new Token(TokenType.EOF, "EOF", lastValidLine, lastValidColumn);
         }
 
         char c = peek();
@@ -306,9 +309,12 @@ public class LexicalAnalyzer {
         if (actual_pos + offset >= source.length()) return '\0';
         return source.charAt(actual_pos + offset);
     }
+
     private char advance() {
         char c = source.charAt(actual_pos);
         actual_pos++;
+        lastValidLine   = actual_line;
+        lastValidColumn = actual_colum;
         if (c == '\n') {
             actual_line++;
             actual_colum = 1;
@@ -317,7 +323,7 @@ public class LexicalAnalyzer {
         }
         return c;
     }
-//final del archivo
+
     private boolean isEOF() {
         return actual_pos >= source.length();
     }
