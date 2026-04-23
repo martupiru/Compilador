@@ -40,7 +40,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      */
 
-    private void match(TokenType expected) {
+    private void match(TokenType expected) throws LexicalException, SyntacticException {
         if (current() == expected) {
             if (hasLookahead) {
                 currentToken = lookaheadToken;
@@ -57,6 +57,8 @@ public class SyntacticAnalyzer {
             );
         }
     }
+
+
     //* debemos llamarlo en el executor
     public void SynAnalyzer() throws LexicalException, SyntacticException{
         program();
@@ -161,7 +163,7 @@ public class SyntacticAnalyzer {
      * - <program> ::= <Lista-Definiciones> <Start> -
      */
     // PRIMEROS: class, impl, start
-    public void program() {
+    public void program() throws LexicalException, SyntacticException {
         listaDefiniciones();
         start();
         match(TokenType.EOF);
@@ -214,7 +216,7 @@ public class SyntacticAnalyzer {
      * - <class> ::= class idclass <class-Fact> -
      * PRIMEROS: class
      */
-    public void classDef() {
+    public void classDef() throws LexicalException, SyntacticException {
         match(TokenType.KW_CLASS);
         match(TokenType.ID_CLASS);
         classDefFact();
@@ -228,7 +230,7 @@ public class SyntacticAnalyzer {
      * - <class-Fact> ::= <Herencia> { <NAtributos> } | { <NAtributos> } -
      * PRIMEROS: : , {
      */
-    public void classDefFact() {
+    public void classDefFact() throws LexicalException, SyntacticException {
         if (current() == TokenType.DOSPUNTOS) {
             herencia();
             match(TokenType.ILLAVE);
@@ -254,7 +256,7 @@ public class SyntacticAnalyzer {
      * - <Herencia> ::= : <Tipo> -
      * PRIMEROS: :
      */
-    public void herencia() {
+    public void herencia() throws LexicalException, SyntacticException {
         match(TokenType.DOSPUNTOS);
         tipo();
     }
@@ -266,7 +268,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Tipo> ::= <Tipo-Primitivo> | <Tipo-Referencia> | <Tipo-Arreglo> -
      */
-    public void tipo(){
+    public void tipo() throws LexicalException, SyntacticException {
         if (esTipoPrimitivo()){
             tipoPrimitivo();
         } else if (current()==TokenType.ID_CLASS) {
@@ -288,7 +290,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Tipo-Primitivo> ::= Str | Bool | Int -
      */
-    public void tipoPrimitivo(){
+    public void tipoPrimitivo() throws LexicalException, SyntacticException {
         if (current()==TokenType.TYPE_STR){
             match(TokenType.TYPE_STR);
         } else if (current()==TokenType.TYPE_BOOL) {
@@ -306,7 +308,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Tipo-Referencia> ::= idclass -
      */
-    public void tipoReferencia(){
+    public void tipoReferencia() throws LexicalException, SyntacticException {
         if (current()==TokenType.ID_CLASS){
             match(TokenType.ID_CLASS);
         }
@@ -319,7 +321,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Tipo-Arreglo> ::= Array <Tipo-Primitivo> -
      */
-    public void tipoArreglo(){
+    public void tipoArreglo() throws LexicalException, SyntacticException {
         if (current()==TokenType.TYPE_ARRAY){
             match(TokenType.TYPE_ARRAY);
             tipoPrimitivo();
@@ -334,7 +336,7 @@ public class SyntacticAnalyzer {
      * - <Sentencia> ::= ; | <Asignacion>; | <Sentencia-Simple>; | if (...) <Sentencia-Else-Fact>
      *                 | while (...) <Sentencia> | for (...) <Sentencia> | <Bloque> | ret <Expresion-Fact>; -
      */
-    public void sentencia(){
+    public void sentencia() throws LexicalException, SyntacticException {
         if (current()==TokenType.PUNTOCOMA){
             match(TokenType.PUNTOCOMA);
         } else if (current()==TokenType.KW_IF) {
@@ -387,7 +389,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Expresion-Fact> ::= <Expresion> | Empty -
      */
-    public void expresionFact() {
+    public void expresionFact() throws LexicalException, SyntacticException {
         if(esPrimeroExpresion()) {
             expresion();
         }//no hay error en el else pq acepta lambda
@@ -400,7 +402,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Sentencia-Else-Fact> ::= else <Sentencia> | Empty -
      */
-    public void sentenciaElseFact(){
+    public void sentenciaElseFact() throws LexicalException, SyntacticException {
         if(current()==TokenType.KW_ELSE){
             match(TokenType.KW_ELSE);
             sentencia();
@@ -414,7 +416,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Bloque> ::= { <NSentencia> } -
      */
-    public void bloque(){
+    public void bloque() throws LexicalException, SyntacticException {
         match(TokenType.ILLAVE);
         nSentencia();
         match(TokenType.DLLAVE);
@@ -427,7 +429,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <Asignacion> ::= <AccesoVar-Simple> = <Expresion> | <AccesoSelf-Simple> = <Expresion> -
      */
-    public void asignacion(){
+    public void asignacion() throws LexicalException, SyntacticException {
         if (current()==TokenType.ID_MET_AT){
             accesoVarSimple();
             match(TokenType.ASIGN);
@@ -452,7 +454,7 @@ public class SyntacticAnalyzer {
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
      * - <AccesoVar-Simple> ::= id <AccesoVar-Simple-Fact> -
      */
-    public void accesoVarSimple(){
+    public void accesoVarSimple() throws LexicalException, SyntacticException {
         match(TokenType.ID_MET_AT);
         accesoVarSimpleFact();
     }
@@ -465,7 +467,7 @@ public class SyntacticAnalyzer {
      * - <AccesoVar-Simple-Fact> ::= <NEncadenado-Simple> | [ <Expresion> ] -
      * PRIMEROS: . [ lambda   SIGUIENTES: =
      */
-    public void accesoVarSimpleFact() {
+    public void accesoVarSimpleFact() throws LexicalException, SyntacticException {
         if (current() == TokenType.ICORCHETE) {
             match(TokenType.ICORCHETE);
             expresion();
@@ -474,50 +476,94 @@ public class SyntacticAnalyzer {
             nEncadenadoSimple();
         }
     }
-    // ================================================================
-    // <AccesoSelf-Simple> ::= self <NEncadenado-Simple>
-    // ================================================================
-    public void accesoSelfSimple() {
+
+    /**
+     * Parsea un acceso simple a través de self.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <AccesoSelf-Simple> ::= self <NEncadenado-Simple> -
+     */
+    public void accesoSelfSimple() throws LexicalException, SyntacticException {
         match(TokenType.KW_SELF);
         nEncadenadoSimple();
     }
-    // ================================================================
-    // <NEncadenado-Simple> ::= <Encadenado-Simple> <NEncadenado-Simple> | Empty
-    // PRIMEROS: . lambda   SIGUIENTES: =
-    // ================================================================
-    public void nEncadenadoSimple() {
+
+    /**
+     * Parsea cero o más encadenados simples.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <NEncadenado-Simple> ::= <Encadenado-Simple> <NEncadenado-Simple> | Empty -
+     * PRIMEROS: . lambda   SIGUIENTES: =
+     */
+    public void nEncadenadoSimple() throws LexicalException, SyntacticException {
         if (current() == TokenType.PUNTO) {
             encadenadoSimple();
             nEncadenadoSimple();
         }
         // lambda
     }
-    // ================================================================
-    // <Encadenado-Simple> ::= . id
-    // ================================================================
-    public void encadenadoSimple() {
+
+    /**
+     * Parsea un encadenado simple (punto seguido de id).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Encadenado-Simple> ::= . id -
+     */
+    public void encadenadoSimple() throws LexicalException, SyntacticException {
         match(TokenType.PUNTO);
         match(TokenType.ID_MET_AT);
     }
-    public void sentenciaSimple() {
+
+    /**
+     * Parsea una sentencia simple (expresión entre paréntesis).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Sentencia-Simple> ::= ( <Expresion> ) -
+     */
+    public void sentenciaSimple() throws LexicalException, SyntacticException {
         match(TokenType.IPAREN);
         expresion();
         match(TokenType.DPAREN);
     }
-///EXPRESION
-public void expresion() {
-    expOr();
-}
 
-    // <ExpOr> ::= <ExpAnd> <ExpOrRec>
-    public void expOr() {
+    ///EXPRESIONES
+
+    /**
+     * Parsea una expresión completa.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Expresion> ::= <ExpOr> -
+     */
+    public void expresion() throws LexicalException, SyntacticException {
+        expOr();
+    }
+
+    /**
+     * Parsea una expresión OR.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpOr> ::= <ExpAnd> <ExpOrRec> -
+     */
+    public void expOr() throws LexicalException, SyntacticException {
         expAnd();
         expOrRec();
     }
 
-    // <ExpOrRec> ::= || <ExpAnd> <ExpOrRec> | Empty
-    // PRIMEROS: || lambda   SIGUIENTES: ) ; ] ,
-    public void expOrRec() {
+    /**
+     * Parsea la parte recursiva de una expresión OR.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpOrRec> ::= || <ExpAnd> <ExpOrRec> | Empty -
+     * PRIMEROS: || lambda   SIGUIENTES: ) ; ] ,
+     */
+    public void expOrRec() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_OR) {
             match(TokenType.OP_OR);
             expAnd();
@@ -526,15 +572,27 @@ public void expresion() {
         // lambda
     }
 
-    // <ExpAnd> ::= <ExpIgual> <ExpAndRec>
-    public void expAnd() {
+    /**
+     * Parsea una expresión AND.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpAnd> ::= <ExpIgual> <ExpAndRec> -
+     */
+    public void expAnd() throws LexicalException, SyntacticException {
         expIgual();
         expAndRec();
     }
 
-    // <ExpAndRec> ::= && <ExpIgual> <ExpAndRec> | Empty
-    // PRIMEROS: && lambda   SIGUIENTES: ) ; ] , ||
-    public void expAndRec() {
+    /**
+     * Parsea la parte recursiva de una expresión AND.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpAndRec> ::= && <ExpIgual> <ExpAndRec> | Empty -
+     * PRIMEROS: && lambda   SIGUIENTES: ) ; ] , ||
+     */
+    public void expAndRec() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_AND) {
             match(TokenType.OP_AND);
             expIgual();
@@ -542,15 +600,28 @@ public void expresion() {
         }
         // lambda
     }
-    // <ExpIgual> ::= <ExpCompuesta> <ExpIgualRec>
-    public void expIgual() {
+
+    /**
+     * Parsea una expresión de igualdad.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpIgual> ::= <ExpCompuesta> <ExpIgualRec> -
+     */
+    public void expIgual() throws LexicalException, SyntacticException {
         expCompuesta();
         expIgualRec();
     }
 
-    // <ExpIgualRec> ::= <OpIgual> <ExpCompuesta> <ExpIgualRec> | Empty
-    // PRIMEROS: == != lambda   SIGUIENTES: ) ; ] , || &&
-    public void expIgualRec() {
+    /**
+     * Parsea la parte recursiva de una expresión de igualdad.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpIgualRec> ::= <OpIgual> <ExpCompuesta> <ExpIgualRec> | Empty -
+     * PRIMEROS: == != lambda   SIGUIENTES: ) ; ] , || &&
+     */
+    public void expIgualRec() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_EQUAL || current() == TokenType.OP_NOT_EQUAL) {
             opIgual();
             expCompuesta();
@@ -559,12 +630,15 @@ public void expresion() {
         // lambda
     }
 
-    // ================================================================
-    // <ExpCompuesta> ::= <ExpAd> <OpCompuesto> <ExpAd>
-    //                  | <ExpAd>
-    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
-    // ================================================================
-    public void expCompuesta() {
+    /**
+     * Parsea una expresión compuesta (comparación relacional opcional).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpCompuesta> ::= <ExpAd> <OpCompuesto> <ExpAd> | <ExpAd> -
+     * PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+     */
+    public void expCompuesta() throws LexicalException, SyntacticException {
         expAd();
         if (current() == TokenType.OP_LESS       ||
                 current() == TokenType.OP_GREATER    ||
@@ -576,21 +650,29 @@ public void expresion() {
         // si no hay opCompuesto -> produccion <ExpAd> sola, salimos
     }
 
-    // ================================================================
-    // <ExpAd> ::= <ExpMul> <ExpAdRec>
-    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
-    // ================================================================
-    public void expAd() {
+    /**
+     * Parsea una expresión aditiva.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpAd> ::= <ExpMul> <ExpAdRec> -
+     * PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+     */
+    public void expAd() throws LexicalException, SyntacticException {
         expMul();
         expAdRec();
     }
 
-    // ================================================================
-    // <ExpAdRec> ::= <OpAd> <ExpMul> <ExpAdRec> | Empty
-    // PRIMEROS: + - lambda
-    // SIGUIENTES: < > <= >= ) ; ] , || && == !=
-    // ================================================================
-    public void expAdRec() {
+    /**
+     * Parsea la parte recursiva de una expresión aditiva.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpAdRec> ::= <OpAd> <ExpMul> <ExpAdRec> | Empty -
+     * PRIMEROS: + - lambda
+     * SIGUIENTES: < > <= >= ) ; ] , || && == !=
+     */
+    public void expAdRec() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_SUM || current() == TokenType.OP_REST) {
             opAd();
             expMul();
@@ -599,21 +681,29 @@ public void expresion() {
         // lambda
     }
 
-    // ================================================================
-    // <ExpMul> ::= <ExpUn> <ExpMulRec>
-    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
-    // ================================================================
-    public void expMul() {
+    /**
+     * Parsea una expresión multiplicativa.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpMul> ::= <ExpUn> <ExpMulRec> -
+     * PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+     */
+    public void expMul() throws LexicalException, SyntacticException {
         expUn();
         expMulRec();
     }
 
-    // ================================================================
-    // <ExpMulRec> ::= <OpMul> <ExpUn> <ExpMulRec> | Empty
-    // PRIMEROS: * / lambda
-    // SIGUIENTES: < > <= >= ) ; ] , || && == !=
-    // ================================================================
-    public void expMulRec() {
+    /**
+     * Parsea la parte recursiva de una expresión multiplicativa.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpMulRec> ::= <OpMul> <ExpUn> <ExpMulRec> | Empty -
+     * PRIMEROS: * / lambda
+     * SIGUIENTES: < > <= >= ) ; ] , || && == !=
+     */
+    public void expMulRec() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_MULT || current() == TokenType.OP_DIV) {
             opMul();
             expUn();
@@ -622,11 +712,15 @@ public void expresion() {
         // lambda
     }
 
-    // ================================================================
-    // <ExpUn> ::= <OpUnario> <ExpUn> | <Operando>
-    // PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
-    // ================================================================
-    public void expUn() {
+    /**
+     * Parsea una expresión unaria u operando.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpUn> ::= <OpUnario> <ExpUn> | <Operando> -
+     * PRIMEROS: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new
+     */
+    public void expUn() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_SUM  ||
                 current() == TokenType.OP_REST ||
                 current() == TokenType.OP_NOT   ||
@@ -646,9 +740,17 @@ public void expresion() {
     }
 
 
+    //OPERADORES!!!
 
-//OPERADORES
-    public void opIgual() {
+
+    /**
+     * Parsea un operador de igualdad (== o !=).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <OpIgual> ::= == | != -
+     */
+    public void opIgual() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_EQUAL) {
             match(TokenType.OP_EQUAL);
         } else if (current() == TokenType.OP_NOT_EQUAL) {
@@ -662,7 +764,14 @@ public void expresion() {
         }
     }
 
-    public void opCompuesto() {
+    /**
+     * Parsea un operador compuesto de comparación (< > <= >=).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <OpCompuesto> ::= < | > | <= | >= -
+     */
+    public void opCompuesto() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_LESS) {
             match(TokenType.OP_LESS);
         } else if (current() == TokenType.OP_GREATER) {
@@ -680,8 +789,14 @@ public void expresion() {
         }
     }
 
-
-    public void opAd() {
+    /**
+     * Parsea un operador aditivo (+ o -).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <OpAd> ::= + | - -
+     */
+    public void opAd() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_SUM) {
             match(TokenType.OP_SUM);
         } else if (current() == TokenType.OP_REST) {
@@ -695,7 +810,14 @@ public void expresion() {
         }
     }
 
-    public void opUnario() {
+    /**
+     * Parsea un operador unario (+, -, !, ++, --).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <OpUnario> ::= + | - | ! | ++ | -- -
+     */
+    public void opUnario() throws LexicalException, SyntacticException {
         if (current() == TokenType.OP_SUM) {
             match(TokenType.OP_SUM);
         } else if (current() == TokenType.OP_REST) {
@@ -715,7 +837,14 @@ public void expresion() {
         }
     }
 
-    public void opMul() {
+    /**
+     * Parsea un operador multiplicativo (* o /).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <OpMul> ::= * | / -
+     */
+    public void opMul()  throws LexicalException, SyntacticException{
         if (current() == TokenType.OP_MULT) {
             match(TokenType.OP_MULT);
         } else if (current() == TokenType.OP_DIV) {
@@ -728,7 +857,15 @@ public void expresion() {
             );
         }
     }
-    public void operando() {
+
+    /**
+     * Parsea un operando (literal o primario con encadenado opcional).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Operando> ::= <Literal> | <Primario> <Encadenado-Empty> -
+     */
+    public void operando() throws LexicalException, SyntacticException {
         if (esLiteral()) {
             literal();
         } else if (esPrimeroPrimario()) {
@@ -743,8 +880,14 @@ public void expresion() {
         }
     }
 
-    // <Literal> ::= nil | true | false | intLiteral | StrLiteral
-    public void literal() {
+    /**
+     * Parsea un literal (nil, true, false, intLiteral, StrLiteral).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Literal> ::= nil | true | false | intLiteral | StrLiteral -
+     */
+    public void literal() throws LexicalException, SyntacticException{
         if (current() == TokenType.KW_NIL) {
             match(TokenType.KW_NIL);
         } else if (current() == TokenType.KW_TRUE) {
@@ -763,12 +906,18 @@ public void expresion() {
             );
         }
     }
-    // ================================================================
-    // <Primario> ::= <ExpresionParentizada> | <AccesoSelf> | <AccesoVar>
-    //              | <Llamada-Metodo> | <Llamada-Metodo-Estatico> | <Llamada-Constructor>
-    // PRIMEROS: (, self, id, idclass, new
-    // ================================================================
-    public void primario() {
+
+    /**
+     * Parsea un primario: expresión parentizada, acceso a self, acceso a variable,
+     * llamada a método, llamada a método estático o llamada a constructor.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Primario> ::= <ExpresionParentizada> | <AccesoSelf> | <AccesoVar>
+     *                | <Llamada-Metodo> | <Llamada-Metodo-Estatico> | <Llamada-Constructor> -
+     * PRIMEROS: (, self, id, idclass, new
+     */
+    public void primario() throws LexicalException, SyntacticException {
         if (current() == TokenType.IPAREN) {
             expresionParentizada();
         } else if (current() == TokenType.KW_SELF) {
@@ -788,7 +937,15 @@ public void expresion() {
             );
         }
     }
-    public void accesoVarOLlamadaMetodo() {
+
+    /**
+     * Parsea un id que puede ser acceso a variable o llamada a método según el token siguiente.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <AccesoVar> ::= id <AccesoVar-Fact> | <Llamada-Metodo> ::= id <Argumentos-Actuales> <Encadenado-Empty> -
+     */
+    public void accesoVarOLlamadaMetodo() throws LexicalException, SyntacticException {
         match(TokenType.ID_MET_AT);
         if (current() == TokenType.IPAREN) {
             // <Llamada-Metodo> -> id <Argumentos-Actuales> <Encadenado-Empty>
@@ -806,20 +963,40 @@ public void expresion() {
     }
 
 
-
-    public void expresionParentizada() {
+    /**
+     * Parsea una expresión entre paréntesis seguida de un encadenado opcional.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <ExpresionParentizada> ::= ( <Expresion> ) <Encadenado-Empty> -
+     */
+    public void expresionParentizada() throws LexicalException, SyntacticException {
         match(TokenType.IPAREN);
         expresion();
         match(TokenType.DPAREN);
         encadenadoEmpty();
     }
 
-    // <AccesoSelf> ::= self <Encadenado-Empty>
-    public void accesoSelf() {
+    /**
+     * Parsea un acceso a self seguido de un encadenado opcional.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <AccesoSelf> ::= self <Encadenado-Empty> -
+     */
+    public void accesoSelf() throws LexicalException, SyntacticException {
         match(TokenType.KW_SELF);
         encadenadoEmpty();
     }
-    public void accesoVarFact() {
+
+    /**
+     * Parsea el sufijo de un acceso a variable (índice o encadenado).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <AccesoVar-Fact> ::= <Encadenado> | [ <Expresion> ] <Encadenado-Empty> -
+     */
+    public void accesoVarFact() throws LexicalException, SyntacticException {
         if (current() == TokenType.ICORCHETE) {
             // produccion: [ <Expresion> ] <Encadenado-Empty>
             match(TokenType.ICORCHETE);
@@ -838,32 +1015,54 @@ public void expresion() {
         }
     }
 
-    // <Llamada-Metodo-Estatico> ::= idclass . <Llamada-Metodo> <Encadenado-Empty>
-    public void llamadaMetodoEstatico() {
+    /**
+     * Parsea una llamada a método estático (idclass . método).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Llamada-Metodo-Estatico> ::= idclass . <Llamada-Metodo> <Encadenado-Empty> -
+     */
+    public void llamadaMetodoEstatico() throws LexicalException, SyntacticException {
         match(TokenType.ID_CLASS);
         match(TokenType.PUNTO);
         llamadaMetodo();
         encadenadoEmpty();
     }
 
-    // <Llamada-Metodo> ::= id <Argumentos-Actuales> <Encadenado-Empty>
-    public void llamadaMetodo() {
+    /**
+     * Parsea una llamada a método (id seguido de argumentos actuales y encadenado opcional).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Llamada-Metodo> ::= id <Argumentos-Actuales> <Encadenado-Empty> -
+     */
+    public void llamadaMetodo()  throws LexicalException, SyntacticException{
         match(TokenType.ID_MET_AT);
         argumentosActuales();
         encadenadoEmpty();
     }
 
-    // <Llamada-Constructor> ::= new <Llamada-Constructor-Fact>
-    public void llamadaConstructor() {
+    /**
+     * Parsea una llamada a constructor (new seguido del tipo o clase).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Llamada-Constructor> ::= new <Llamada-Constructor-Fact> -
+     */
+    public void llamadaConstructor() throws LexicalException, SyntacticException {
         match(TokenType.KW_NEW);
         llamadaConstructorFact();
     }
-    // ================================================================
-    // <Llamada-Constructor-Fact> ::= <Tipo-Primitivo> [ <Expresion> ]
-    //                              | idclass <Argumentos-Actuales> <Encadenado-Empty>
-    // PRIMEROS: Str, Bool, Int, idclass
-    // ================================================================
-    public void llamadaConstructorFact() {
+
+    /**
+     * Parsea el tipo instanciado en una llamada a constructor.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Llamada-Constructor-Fact> ::= <Tipo-Primitivo> [ <Expresion> ] | idclass <Argumentos-Actuales> <Encadenado-Empty> -
+     * PRIMEROS: Str, Bool, Int, idclass
+     */
+    public void llamadaConstructorFact() throws LexicalException, SyntacticException {
         if (current() == TokenType.ID_CLASS) {
             match(TokenType.ID_CLASS);
             argumentosActuales();
@@ -881,8 +1080,15 @@ public void expresion() {
             );
         }
     }
-    // <Argumentos-Actuales> ::= ( <Lista-Expresiones> ) | ()
-    public void argumentosActuales() {
+
+    /**
+     * Parsea los argumentos actuales de una llamada (lista de expresiones entre paréntesis).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Argumentos-Actuales> ::= ( <Lista-Expresiones> ) | () -
+     */
+    public void argumentosActuales() throws LexicalException, SyntacticException {
         match(TokenType.IPAREN);
         if (esPrimeroExpresion()) {
             listaExpresiones();
@@ -890,30 +1096,55 @@ public void expresion() {
         match(TokenType.DPAREN);
     }
 
-    // <Lista-Expresiones> ::= <Expresion> <Lista-Expresiones-Fact>
-    public void listaExpresiones() {
+    /**
+     * Parsea una lista de expresiones separadas por coma.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Lista-Expresiones> ::= <Expresion> <Lista-Expresiones-Fact> -
+     */
+    public void listaExpresiones()  throws LexicalException, SyntacticException{
         expresion();
         listaExpresionesFact();
     }
 
-    // <Lista-Expresiones-Fact> ::= , <Lista-Expresiones> | Empty
-    // PRIMEROS: , lambda   SIGUIENTES: )
-    public void listaExpresionesFact() {
+    /**
+     * Parsea el resto opcional de una lista de expresiones.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Lista-Expresiones-Fact> ::= , <Lista-Expresiones> | Empty -
+     * PRIMEROS: , lambda   SIGUIENTES: )
+     */
+    public void listaExpresionesFact() throws LexicalException, SyntacticException {
         if (current() == TokenType.COMA) {
             match(TokenType.COMA);
             listaExpresiones();
         }
         // lambda
     }
-    // <Encadenado> ::= . <Encadenado-Fact>
-    public void encadenado() {
+
+    /**
+     * Parsea un encadenado (punto seguido de su contenido).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Encadenado> ::= . <Encadenado-Fact> -
+     */
+    public void encadenado() throws LexicalException, SyntacticException {
         match(TokenType.PUNTO);
         encadenadoFact();
     }
 
-    // <Encadenado-Fact> ::= <Llamada-Metodo-Encadenado> | <Acceso-Var>
+    /**
+     * Parsea el contenido de un encadenado: llamada a método encadenado o acceso a variable.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Encadenado-Fact> ::= <Llamada-Metodo-Encadenado> | <AccesoVar> -
+     */
     // Ambos empiezan con id entonces aca hicimos dos reglas: EncadenadoFact y LlamadaMetodoEncadenado
-    public void encadenadoFact() {
+    public void encadenadoFact() throws LexicalException, SyntacticException {
         if (current() == TokenType.ID_MET_AT) {
             match(TokenType.ID_MET_AT);
             //Por LlamadaMetodoEncadenado debemos esperar un (
@@ -939,20 +1170,30 @@ public void expresion() {
         }
     }
 
-
-    // <Encadenado-Empty> ::= <Encadenado> | Empty
-    // PRIMEROS: . lambda
-    public void encadenadoEmpty() {
+    /**
+     * Parsea un encadenado opcional (puede ser vacío).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Encadenado-Empty> ::= <Encadenado> | Empty -
+     * PRIMEROS: . lambda
+     */
+    public void encadenadoEmpty() throws LexicalException, SyntacticException {
         if (current() == TokenType.PUNTO) {
             encadenado();
         }
         // lambda
     }
 
-
-    // <Impl> ::= impl idclass { <NMiembro> }
-    // PRIMEROS: impl
-    public void implDef() {
+    /**
+     * Parsea una implementación de clase (impl).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Impl> ::= impl idclass { <NMiembro> } -
+     * PRIMEROS: impl
+     */
+    public void implDef() throws LexicalException, SyntacticException {
         match(TokenType.KW_IMPL);
         match(TokenType.ID_CLASS);
         match(TokenType.ILLAVE);
@@ -960,9 +1201,15 @@ public void expresion() {
         match(TokenType.DLLAVE);
     }
 
-    // <NMiembro> ::= <Miembro> <NMiembro> | Empty
-    // PRIMEROS: fn, st, . , lambda   SIGUIENTES: }
-    public void nMiembro() {
+    /**
+     * Parsea cero o más miembros de una implementación.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <NMiembro> ::= <Miembro> <NMiembro> | Empty -
+     * PRIMEROS: fn, st, . , lambda   SIGUIENTES: }
+     */
+    public void nMiembro() throws LexicalException, SyntacticException {
         if (current() == TokenType.KW_FN  || current() == TokenType.KW_ST  || current() == TokenType.PUNTO) {
             miembro();
             nMiembro();
@@ -970,9 +1217,15 @@ public void expresion() {
         // lambda: siguiente es }, salimos
     }
 
-    // <NAtributos> ::= <Atributo> <NAtributos> | Empty
-    // PRIMEROS: Str, Bool, Int, idclass, Array, pub, lambda   SIGUIENTES: }
-    public void nAtributos() {
+    /**
+     * Parsea cero o más atributos de una clase.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <NAtributos> ::= <Atributo> <NAtributos> | Empty -
+     * PRIMEROS: Str, Bool, Int, idclass, Array, pub, lambda   SIGUIENTES: }
+     */
+    public void nAtributos()  throws LexicalException, SyntacticException{
         if (esTipo() || current() == TokenType.KW_PUB) {
             atributo();
             nAtributos();
@@ -980,7 +1233,14 @@ public void expresion() {
         // lambda: siguiente es }, salimos
     }
 
-    public void miembro() {
+    /**
+     * Parsea un miembro de una implementación (método o constructor).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Miembro> ::= <Metodo> | <Constructor> -
+     */
+    public void miembro()  throws LexicalException, SyntacticException{
         if (current() == TokenType.KW_FN || current() == TokenType.KW_ST) {
             metodo();
 
@@ -994,7 +1254,16 @@ public void expresion() {
             );
         }
     }
-    public void metodo(){
+
+    /**
+     * Parsea la definición de un método (con o sin forma estática).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Metodo> ::= fn <Tipo-Metodo-Fact> idMetAt <Argumentos-Formales> <Bloque-Metodo>
+     *              | <Forma-Metodo> fn <Tipo-Metodo-Fact> idMetAt <Argumentos-Formales> <Bloque-Metodo> -
+     */
+    public void metodo() throws LexicalException, SyntacticException {
             if (current()==TokenType.KW_FN){
                 match(TokenType.KW_FN);
                 tipoMetodoFact();
@@ -1017,54 +1286,130 @@ public void expresion() {
             }
     }
 
-    public void tipoMetodoFact(){
+    /**
+     * Parsea el tipo de retorno de un método si existe (puede ser vacío).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Tipo-Metodo-Fact> ::= <Tipo-Metodo> | Empty -
+     */
+    public void tipoMetodoFact() throws LexicalException, SyntacticException {
         if (esTipo()||current()==TokenType.TYPE_VOID){
             tipoMetodo();
         }//tipo metodoFact produce lambda por eso no hay exception
     }
-    public void visibilidad(){
+
+    /**
+     * Parsea la visibilidad pública de un atributo.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Visibilidad> ::= pub -
+     */
+    public void visibilidad() throws LexicalException, SyntacticException {
         match(TokenType.KW_PUB); //la exeption la maneja el match
     }
-    public void formaMetodo(){
+
+    /**
+     * Parsea la forma estática de un método.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Forma-Metodo> ::= st -
+     */
+    public void formaMetodo() throws LexicalException, SyntacticException {
         match(TokenType.KW_ST); //la exeption la maneja el match
     }
-    public void nSentencia(){
+
+    /**
+     * Parsea cero o más sentencias.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <NSentencia> ::= <Sentencia> <NSentencia> | Empty -
+     */
+    public void nSentencia() throws LexicalException, SyntacticException {
         if(esPrimeroSentencia()){
             sentencia();
             nSentencia();
         }//sin exception por lambda
     }
 
-
-    public void bloqueMetodo(){
+    /**
+     * Parsea el bloque de un método (declaraciones locales y sentencias).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Bloque-Metodo> ::= { <NDecl-Var-Loc> <NSentencia> } -
+     */
+    public void bloqueMetodo() throws LexicalException, SyntacticException {
         match(TokenType.ILLAVE);
         nDeclaracionVarLocales();
         nSentencia();
         match(TokenType.DLLAVE);
     }
-    public void nDeclaracionVarLocales(){
+
+    /**
+     * Parsea cero o más declaraciones de variables locales.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <NDecl-Var-Loc> ::= <Decl-Var-Locales> <NDecl-Var-Loc> | Empty -
+     */
+    public void nDeclaracionVarLocales() throws LexicalException, SyntacticException {
         if (esTipo()){
             declaracionVarLocal();
             nDeclaracionVarLocales();
         }
     }
-    public void declaracionVarLocal(){
+
+    /**
+     * Parsea una declaración de variable local.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Decl-Var-Locales> ::= <Tipo> <Lista-Declaracion-Variables> ; -
+     */
+    public void declaracionVarLocal() throws LexicalException, SyntacticException {
         if(esTipo()){
             tipo();
             listaDeclaracionVariables();
         }
     }
-    public void listaDeclaracionVariables(){
+
+    /**
+     * Parsea una lista de variables declaradas (al menos un id).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Lista-Declaracion-Variables> ::= idMetAt <Lista-Declaracion-Variables-Fact> -
+     */
+    public void listaDeclaracionVariables() throws LexicalException, SyntacticException {
         match(TokenType.ID_MET_AT);
         listaDeclaracionVariablesFact();
     }
-    public void listaDeclaracionVariablesFact(){
+
+    /**
+     * Parsea el resto opcional de una lista de declaraciones de variables.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Lista-Declaracion-Variables-Fact> ::= , <Lista-Declaracion-Variables> | Empty -
+     */
+    public void listaDeclaracionVariablesFact() throws LexicalException, SyntacticException {
         match(TokenType.COMA);
         listaDeclaracionVariables();
     }
-    public void argumentosFormales(){
+
+    /**
+     * Parsea los argumentos formales de un método entre paréntesis.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Argumentos-Formales> ::= ( <Lista-Argumentos-Formales> ) | () -
+     */
+    public void argumentosFormales() throws LexicalException, SyntacticException {
         match(TokenType.IPAREN);
-        //⟨Argumentos-Formales⟩ ::= ( ⟨Lista-Argumentos-Formales⟩ ) | ()
         //<Lista-Argumentos-Formales> ::= <Argumento-Formal> <Lista-Argumentos-Formales-Fact>
         //<Argumento-Formal> ::= <Tipo> idMetAt
         if (esTipo()){ //por los primeros de argumento formal q son los primeros de tipo
@@ -1072,7 +1417,15 @@ public void expresion() {
         }
         match(TokenType.DPAREN);
     }
-    public void listaArgumentosFormales(){
+
+    /**
+     * Parsea una lista de argumentos formales.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Lista-Argumentos-Formales> ::= <Argumento-Formal> <Lista-Argumentos-Formales-Fact> -
+     */
+    public void listaArgumentosFormales() throws LexicalException, SyntacticException {
         if(esTipo()){
             argumentoFormal();
             listaArgumentosFormalesFact();
@@ -1084,17 +1437,42 @@ public void expresion() {
             );
         }
     }
-    public void listaArgumentosFormalesFact(){
+
+    /**
+     * Parsea el resto opcional de una lista de argumentos formales.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Lista-Argumentos-Formales-Fact> ::= , <Lista-Argumentos-Formales> | Empty -
+     */
+    public void listaArgumentosFormalesFact() throws LexicalException, SyntacticException {
         if(current()==TokenType.COMA){
             match(TokenType.COMA);
             listaArgumentosFormales();
         }
     }//sin exception por lambda
-    public void argumentoFormal(){
+
+
+    /**
+     * Parsea un argumento formal (tipo seguido de id).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Argumento-Formal> ::= <Tipo> idMetAt -
+     */
+    public void argumentoFormal() throws LexicalException, SyntacticException {
         tipo();
         match(TokenType.ID_MET_AT);
     }
-    public void tipoMetodo(){
+
+    /**
+     * Parsea el tipo de retorno de un método (tipo o void).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Tipo-Metodo> ::= <Tipo> | void -
+     */
+    public void tipoMetodo() throws LexicalException, SyntacticException {
         if (esTipo()){
             tipo();
         } else if (current()==TokenType.TYPE_VOID) {
@@ -1107,7 +1485,15 @@ public void expresion() {
             );
         }
     }
-    public void atributo() {
+
+    /**
+     * Parsea un atributo de clase (con o sin visibilidad pública).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Atributo> ::= <Tipo> <Lista-Declaracion-Variables> ; | <Visibilidad> <Tipo> <Lista-Declaracion-Variables> ; -
+     */
+    public void atributo() throws LexicalException, SyntacticException {
         if (esTipo()) {
             tipo();
             listaDeclaracionVariables();
@@ -1127,7 +1513,14 @@ public void expresion() {
         }
     }
 
-    public void constructor() {
+    /**
+     * Parsea el constructor de una clase (punto seguido de argumentos y bloque).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Constructor> ::= . <Argumentos-Formales> <Bloque-Metodo> -
+     */
+    public void constructor() throws LexicalException, SyntacticException {
         match(TokenType.PUNTO);
         argumentosFormales();
         bloqueMetodo();
