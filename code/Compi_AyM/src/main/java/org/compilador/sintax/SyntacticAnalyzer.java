@@ -1374,6 +1374,7 @@ public class SyntacticAnalyzer {
         if(esTipo()){
             tipo();
             listaDeclaracionVariables();
+            match(TokenType.PUNTOCOMA);
         }
     }
 
