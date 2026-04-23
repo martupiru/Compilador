@@ -6,6 +6,10 @@ import org.compilador.lexer.lexicalAnalyzer.LexicalAnalyzer;
 import org.compilador.lexer.token.Token;
 import org.compilador.lexer.token.TokenType;
 
+/**
+ * Analizador sintáctico compi
+ * @author Aida Laricchia y Martina Nahman
+ */
 public class SyntacticAnalyzer {
 
     private LexicalAnalyzer lexer;
@@ -21,7 +25,6 @@ public class SyntacticAnalyzer {
     /**
      * Retorna el tipo del token actual.
      * @return TokenType actual
-     * @author Aida Laricchia y Martina Nahman
      */
 
     private TokenType current() {
@@ -35,7 +38,6 @@ public class SyntacticAnalyzer {
      * @param expected El tipo de token esperado.
      * @throws LexicalException Excepción ocasionada por un error léxico
      * @throws SyntacticException Excepción ocasionada por un error sintáctico
-     * @author Aida Laricchia y Martina Nahman
      */
 
     private void match(TokenType expected) {
@@ -55,24 +57,18 @@ public class SyntacticAnalyzer {
             );
         }
     }
-    /**
-     * Lee el siguiente token sin consumirlo para resolver ambigüedades LL(1).
-     *
-     * @throws LexicalException Excepción ocasionada por un error léxico
-     * @author Aida Laricchia y Martina Nahman
-     */
-    private void peekToken() {
-        if (!hasLookahead) {
-            lookaheadToken = lexer.nextToken();
-            hasLookahead = true;
-        }
-    }
-
+    //* debemos llamarlo en el executor
     public void SynAnalyzer() throws LexicalException, SyntacticException{
         program();
 
     }
 //PRIMEROSSSSSSSSSS
+
+    /**
+     * Verifica si el token actual es un tipo válido (Str, Bool, Int, idclass, Array).
+     *
+     * @return true si el token actual es un tipo
+     */
     private boolean esTipo() {
         return current() == TokenType.TYPE_STR   ||  // Str
                 current() == TokenType.TYPE_BOOL  ||  // Bool
@@ -82,14 +78,22 @@ public class SyntacticAnalyzer {
     }
 
 
-    /** PRIMEROS de TipoPrimitivo: Str, Bool, Int */
+    /**
+     * Verifica si el token actual es un tipo primitivo (Str, Bool, Int).
+     *
+     * @return true si el token actual es un tipo primitivo
+     */
     private boolean esTipoPrimitivo() {
         return current() == TokenType.TYPE_STR  ||
                 current() == TokenType.TYPE_BOOL ||
                 current() == TokenType.TYPE_INT;
     }
 
-    /** PRIMEROS de Literal: nil, true, false, intLiteral, StrLiteral */
+    /**
+     * Verifica si el token actual es un literal (nil, true, false, intLiteral, StrLiteral).
+     *
+     * @return true si el token actual es un literal
+     */
     private boolean esLiteral() {
         return current() == TokenType.KW_NIL   ||
                 current() == TokenType.KW_TRUE  ||
@@ -97,8 +101,11 @@ public class SyntacticAnalyzer {
                 current() == TokenType.LIT_INT  ||
                 current() == TokenType.LIT_STR;
     }
-
-    /** PRIMEROS de Primario: (, self, id, idclass, new */
+    /**
+     * Verifica si el token actual puede iniciar un Primario (, self, id, idclass, new).
+     *
+     * @return true si el token actual es primero de Primario
+     */
     private boolean esPrimeroPrimario() {
         return current() == TokenType.IPAREN     ||
                 current() == TokenType.KW_SELF    ||
@@ -107,6 +114,10 @@ public class SyntacticAnalyzer {
                 current() == TokenType.KW_NEW;
     }
 
+    /**
+     * Verifica si el token actual puede iniciar una Expresión.
+     *
+     * @return true si el token actual es primero de Expresión
     /** PRIMEROS de Expresion: +,-,!,++,--,nil,true,false,intLit,StrLit,(,self,id,idclass,new */
     private boolean esPrimeroExpresion() {
         return current() == TokenType.OP_SUM   ||
@@ -125,7 +136,10 @@ public class SyntacticAnalyzer {
                 current() == TokenType.ID_CLASS   ||
                 current() == TokenType.KW_NEW;
     }
-
+    /**
+     * Verifica si el token actual puede iniciar una Sentencia.
+     *
+     * @return true si el token actual es primero de Sentencia
     /** PRIMEROS de Sentencia: ; if while for ret id self ( { */
     private boolean esPrimeroSentencia() {
         return current() == TokenType.PUNTOCOMA  ||
@@ -138,7 +152,14 @@ public class SyntacticAnalyzer {
                 current() == TokenType.IPAREN     ||
                 current() == TokenType.ILLAVE;
     }
-    // <program> ::= <Lista-Definiciones> <Start>
+
+    /**
+     * Punto de entrada de la gramática. Parsea el programa completo.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <program> ::= <Lista-Definiciones> <Start> -
+     */
     // PRIMEROS: class, impl, start
     public void program() {
         listaDefiniciones();
@@ -146,11 +167,15 @@ public class SyntacticAnalyzer {
         match(TokenType.EOF);
     }
 
-    // <Lista-Definiciones> ::= <class> <Lista-Definiciones>
-    //                        | <Impl> <Lista-Definiciones>
-    //                        | Empty
-    // PRIMEROS: class, impl, lambda   SIGUIENTES: start
-    public void listaDefiniciones() {
+    /**
+     * Parsea cero o más definiciones de clase e implementación.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Lista-Definiciones> ::= <class> <Lista-Definiciones> | <Impl> <Lista-Definiciones> | Empty -
+     * PRIMEROS: class, impl, lambda   SIGUIENTES: start
+     */
+    public void listaDefiniciones() throws LexicalException, SyntacticException {
         if (current() == TokenType.KW_CLASS) {
             classDef();
             listaDefiniciones();
@@ -161,9 +186,15 @@ public class SyntacticAnalyzer {
         // lambda: siguiente es start, salimos
     }
 
-    // <Start> ::= start <Bloque-Metodo>
-    // PRIMEROS: start
-    public void start() {
+    /**
+     * Parsea el bloque principal del programa.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Start> ::= start <Bloque-Metodo> -
+     * PRIMEROS: start
+     */
+    public void start() throws LexicalException, SyntacticException{
         if (current() == TokenType.ID_START) {
             match(TokenType.ID_START);
             bloqueMetodo();
@@ -175,17 +206,28 @@ public class SyntacticAnalyzer {
         }
     }
 
-    // <class> ::= class idclass <class-Fact>
-    // PRIMEROS: class
+    /**
+     * Parsea la definición de una clase.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <class> ::= class idclass <class-Fact> -
+     * PRIMEROS: class
+     */
     public void classDef() {
         match(TokenType.KW_CLASS);
         match(TokenType.ID_CLASS);
         classDefFact();
     }
 
-    // <class-Fact> ::= <Herencia> { <NAtributos> }
-    //               | { <NAtributos> }
-    // PRIMEROS: : , {
+    /**
+     * Parsea el cuerpo de una clase, con o sin herencia.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <class-Fact> ::= <Herencia> { <NAtributos> } | { <NAtributos> } -
+     * PRIMEROS: : , {
+     */
     public void classDefFact() {
         if (current() == TokenType.DOSPUNTOS) {
             herencia();
@@ -204,13 +246,26 @@ public class SyntacticAnalyzer {
         }
     }
 
-    // <Herencia> ::= : <Tipo>
-    // PRIMEROS: :
+    /**
+     * Parsea la cláusula de herencia de una clase.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Herencia> ::= : <Tipo> -
+     * PRIMEROS: :
+     */
     public void herencia() {
         match(TokenType.DOSPUNTOS);
         tipo();
     }
 
+    /**
+     * Parsea un tipo (primitivo, referencia o arreglo).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Tipo> ::= <Tipo-Primitivo> | <Tipo-Referencia> | <Tipo-Arreglo> -
+     */
     public void tipo(){
         if (esTipoPrimitivo()){
             tipoPrimitivo();
@@ -218,13 +273,21 @@ public class SyntacticAnalyzer {
             tipoReferencia();
         } else if (current()==TokenType.TYPE_ARRAY) {
             tipoArreglo();
-        }else {
+        } else {
             throw new SyntacticException(
-                    "Se esperaba ':' o '{', se encontro " + current(),
+                    "Se esperaba un tipo (Str, Bool, Int, idclass, Array), se encontro " + current(),
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
     }
+
+    /**
+     * Parsea un tipo primitivo (Str, Bool o Int).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Tipo-Primitivo> ::= Str | Bool | Int -
+     */
     public void tipoPrimitivo(){
         if (current()==TokenType.TYPE_STR){
             match(TokenType.TYPE_STR);
@@ -233,19 +296,44 @@ public class SyntacticAnalyzer {
         } else if (current()==TokenType.TYPE_INT) {
             match(TokenType.TYPE_INT);
 
-        }//no hay error pq ya esta en tipo entonces si el lambda tira error ahi
+        }//no hay error pq ya esta en tipo entonces si es lambda tira error ahi
     }
+
+    /**
+     * Parsea un tipo referencia (idclass).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Tipo-Referencia> ::= idclass -
+     */
     public void tipoReferencia(){
         if (current()==TokenType.ID_CLASS){
             match(TokenType.ID_CLASS);
         }
     }
+
+    /**
+     * Parsea un tipo arreglo (Array seguido de tipo primitivo).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Tipo-Arreglo> ::= Array <Tipo-Primitivo> -
+     */
     public void tipoArreglo(){
         if (current()==TokenType.TYPE_ARRAY){
             match(TokenType.TYPE_ARRAY);
             tipoPrimitivo();
         }
     }
+
+    /**
+     * Parsea una sentencia del lenguaje.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Sentencia> ::= ; | <Asignacion>; | <Sentencia-Simple>; | if (...) <Sentencia-Else-Fact>
+     *                 | while (...) <Sentencia> | for (...) <Sentencia> | <Bloque> | ret <Expresion-Fact>; -
+     */
     public void sentencia(){
         if (current()==TokenType.PUNTOCOMA){
             match(TokenType.PUNTOCOMA);
@@ -283,31 +371,62 @@ public class SyntacticAnalyzer {
             match(TokenType.PUNTOCOMA);
         } else if (current()==TokenType.ILLAVE) {
             bloque();
-        }//else {
-           // throw new SyntacticException(
-             //       "Se esperaba ':' o '{', se encontro " + current(),
-               //     currentToken.getLine(), currentToken.getColumn()
-            //);}
-            //!!!!!!!!!!!!!poner error
-
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba una sentencia, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
     }
+
+    /**
+     * Parsea una expresión opcional (puede ser vacía).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Expresion-Fact> ::= <Expresion> | Empty -
+     */
     public void expresionFact() {
         if(esPrimeroExpresion()) {
             expresion();
         }//no hay error en el else pq acepta lambda
     }
 
+    /**
+     * Parsea la rama else opcional de un if.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Sentencia-Else-Fact> ::= else <Sentencia> | Empty -
+     */
     public void sentenciaElseFact(){
         if(current()==TokenType.KW_ELSE){
             match(TokenType.KW_ELSE);
             sentencia();
         }//no hay error pq hacepta lambda
     }
+
+    /**
+     * Parsea un bloque de sentencias entre llaves.
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Bloque> ::= { <NSentencia> } -
+     */
     public void bloque(){
         match(TokenType.ILLAVE);
         nSentencia();
         match(TokenType.DLLAVE);
     }
+
+    /**
+     * Parsea una asignación (a variable simple o a self).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <Asignacion> ::= <AccesoVar-Simple> = <Expresion> | <AccesoSelf-Simple> = <Expresion> -
+     */
     public void asignacion(){
         if (current()==TokenType.ID_MET_AT){
             accesoVarSimple();
@@ -317,18 +436,35 @@ public class SyntacticAnalyzer {
             accesoSelfSimple();
             match(TokenType.ASIGN);
             expresion();
-        }else{
-            Exception//!!!!!!!!!!!!!!!
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba id o self para una asignacion, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
+                    currentToken.getLine(), currentToken.getColumn()
+            );
         }
     }
+
+    /**
+     * Parsea el acceso a una variable simple (id seguido de encadenado o índice).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <AccesoVar-Simple> ::= id <AccesoVar-Simple-Fact> -
+     */
     public void accesoVarSimple(){
         match(TokenType.ID_MET_AT);
         accesoVarSimpleFact();
     }
-    // <AccesoVar-Simple-Fact> ::= <NEncadenado-Simple>
-    //                           | [ <Expresion> ]
-    // PRIMEROS: . [ lambda   SIGUIENTES: =
-    // ================================================================
+
+    /**
+     * Parsea el sufijo de un acceso a variable simple (encadenado o acceso por índice).
+     *
+     * @throws LexicalException   Excepción ocasionada por un error léxico
+     * @throws SyntacticException Excepción ocasionada por un error sintáctico
+     * - <AccesoVar-Simple-Fact> ::= <NEncadenado-Simple> | [ <Expresion> ] -
+     * PRIMEROS: . [ lambda   SIGUIENTES: =
+     */
     public void accesoVarSimpleFact() {
         if (current() == TokenType.ICORCHETE) {
             match(TokenType.ICORCHETE);
@@ -502,7 +638,8 @@ public void expresion() {
             operando();
         } else {
             throw new SyntacticException(
-                    "Se esperaba expresion unaria u operando, se encontro " + current(),
+                    "Se esperaba expresion unaria u operando, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -511,18 +648,19 @@ public void expresion() {
 
 
 //OPERADORES
-public void opIgual() {
-    if (current() == TokenType.OP_EQUAL) {
-        match(TokenType.OP_EQUAL);
-    } else if (current() == TokenType.OP_NOT_EQUAL) {
-        match(TokenType.OP_NOT_EQUAL);
-    } else {
-        throw new SyntacticException(
-                "Se esperaba == o !=, se encontro " + current(),
-                currentToken.getLine(), currentToken.getColumn()
-        );
+    public void opIgual() {
+        if (current() == TokenType.OP_EQUAL) {
+            match(TokenType.OP_EQUAL);
+        } else if (current() == TokenType.OP_NOT_EQUAL) {
+            match(TokenType.OP_NOT_EQUAL);
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba == o !=, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
+                    currentToken.getLine(), currentToken.getColumn()
+            );
+        }
     }
-}
 
     public void opCompuesto() {
         if (current() == TokenType.OP_LESS) {
@@ -535,11 +673,14 @@ public void opIgual() {
             match(TokenType.OP_GREATER_EQ);
         } else {
             throw new SyntacticException(
-                    "Se esperaba operador compuesto (<, >, <=, >=), se encontro " + current(),
+                    "Se esperaba operador compuesto (<, >, <=, >=), se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
     }
+
+
     public void opAd() {
         if (current() == TokenType.OP_SUM) {
             match(TokenType.OP_SUM);
@@ -547,7 +688,8 @@ public void opIgual() {
             match(TokenType.OP_REST);
         } else {
             throw new SyntacticException(
-                    "Se esperaba + o -, se encontro " + current(),
+                    "Se esperaba + o -, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -566,7 +708,8 @@ public void opIgual() {
             match(TokenType.OP_DEC);
         } else {
             throw new SyntacticException(
-                    "Se esperaba operador unario (+,-,!,++,--), se encontro " + current(),
+                    "Se esperaba operador unario (+, -, !, ++, --), se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -579,7 +722,8 @@ public void opIgual() {
             match(TokenType.OP_DIV);
         } else {
             throw new SyntacticException(
-                    "Se esperaba * o /, se encontro " + current(),
+                    "Se esperaba * o /, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -592,7 +736,8 @@ public void opIgual() {
             encadenadoEmpty();
         } else {
             throw new SyntacticException(
-                    "Se esperaba un operando, se encontro " + current(),
+                    "Se esperaba un operando, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -612,7 +757,8 @@ public void opIgual() {
             match(TokenType.LIT_STR);
         } else {
             throw new SyntacticException(
-                    "Se esperaba un literal, se encontro " + current(),
+                    "Se esperaba un literal, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -633,11 +779,11 @@ public void opIgual() {
             llamadaConstructor();
         } else if (current() == TokenType.ID_MET_AT) {
             // id -> AccesoVar o Llamada-Metodo segun lo que siga
-            //OJOOOOOOOOOOOOOO ACAAAAAAAAAA REVISAR Q PASA
             accesoVarOLlamadaMetodo();
         } else {
             throw new SyntacticException(
-                    "Se esperaba primario, se encontro " + current(),
+                    "Se esperaba primario, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -650,8 +796,12 @@ public void opIgual() {
             encadenadoEmpty();
         } else if (current()==TokenType.PUNTO || current()==TokenType.ICORCHETE) {
             accesoVarFact();
-        }else {
-            error
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba '(', '.' o '[' despues de id, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
+                    currentToken.getLine(), currentToken.getColumn()
+            );
         }
     }
 
@@ -679,8 +829,12 @@ public void opIgual() {
         } else if (current() == TokenType.PUNTO) {
             // produccion: <Encadenado>
             encadenado();
-        }else{
-            error
+        } else {
+            throw new SyntacticException(
+                    "Se esperaba '.' o '[' en acceso a variable, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
+                    currentToken.getLine(), currentToken.getColumn()
+            );
         }
     }
 
@@ -721,7 +875,8 @@ public void opIgual() {
             match(TokenType.DCORCHETE);
         } else {
             throw new SyntacticException(
-                    "Se esperaba idclass o tipo primitivo despues de 'new', se encontro " + current(),
+                    "Se esperaba idclass o tipo primitivo despues de 'new', se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -768,10 +923,17 @@ public void opIgual() {
             //Por AccesoVar esperamos un . o [
             } else if (current()==TokenType.ICORCHETE ||current()==TokenType.PUNTO ) {
                 accesoVarFact();
+            } else {
+                throw new SyntacticException(
+                        "Se esperaba '(', '[' o '.' despues de id en encadenado, se encontro " + current()
+                                + " ('" + currentToken.getLexema() + "')",
+                        currentToken.getLine(), currentToken.getColumn()
+                );
             }
         } else {
             throw new SyntacticException(
-                    "Se esperaba id despues de '.', se encontro " + current(),
+                    "Se esperaba id despues de '.', se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -824,9 +986,10 @@ public void opIgual() {
 
         }else if (current() == TokenType.PUNTO) {
             constructor();
-        }else{
+        } else {
             throw new SyntacticException(
-                    "Se esperaba un miembro (fn, st o '.'), se encontro " + current(),
+                    "Se esperaba un miembro (fn, st o '.'), se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -845,13 +1008,15 @@ public void opIgual() {
                 match(TokenType.ID_MET_AT);
                 argumentosFormales();
                 bloqueMetodo();
-            }else{
+            } else {
                 throw new SyntacticException(
-                        "Se esperaba un miembro (fn, st o '.'), se encontro " + current(),
+                        "Se esperaba fn o st para definir un metodo, se encontro " + current()
+                                + " ('" + currentToken.getLexema() + "')",
                         currentToken.getLine(), currentToken.getColumn()
                 );
             }
     }
+
     public void tipoMetodoFact(){
         if (esTipo()||current()==TokenType.TYPE_VOID){
             tipoMetodo();
@@ -911,9 +1076,10 @@ public void opIgual() {
         if(esTipo()){
             argumentoFormal();
             listaArgumentosFormalesFact();
-        }else{
+        } else {
             throw new SyntacticException(
-                    "Se esperaba un miembro (fn, st o '.'), se encontro " + current(),
+                    "Se esperaba un tipo para el argumento formal, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -933,9 +1099,10 @@ public void opIgual() {
             tipo();
         } else if (current()==TokenType.TYPE_VOID) {
             match(TokenType.TYPE_VOID);
-        }else {
+        } else {
             throw new SyntacticException(
-                    "Se esperaba un miembro (fn, st o '.'), se encontro " + current(),
+                    "Se esperaba un tipo de retorno o void, se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
@@ -951,16 +1118,16 @@ public void opIgual() {
             listaDeclaracionVariables();
             match(TokenType.PUNTOCOMA);
 
-        }else{
+        } else {
             throw new SyntacticException(
-                    "Se esperaba un miembro (fn, st o '.'), se encontro " + current(),
+                    "Se esperaba un atributo (tipo o pub), se encontro " + current()
+                            + " ('" + currentToken.getLexema() + "')",
                     currentToken.getLine(), currentToken.getColumn()
             );
         }
     }
 
     public void constructor() {
-        // ACÁ VA EXCEPCION??
         match(TokenType.PUNTO);
         argumentosFormales();
         bloqueMetodo();
