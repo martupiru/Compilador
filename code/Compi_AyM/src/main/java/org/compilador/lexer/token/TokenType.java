@@ -27,7 +27,7 @@ public enum TokenType {
     TYPE_BOOL,
     TYPE_VOID,
     TYPE_ARRAY,
-    TYPE_IO, //IO : (IO.out_str("hola mundo"))
+    //TYPE_IO, //IO : (IO.out_str("hola mundo"))
 
     //Identificadores
     ID_CLASS,       //empieza con MAYUSCULA

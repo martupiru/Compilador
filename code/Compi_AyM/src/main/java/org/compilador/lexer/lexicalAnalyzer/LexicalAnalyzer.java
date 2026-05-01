@@ -35,7 +35,6 @@ public class LexicalAnalyzer {
         //TIPOS ESPECIALES
         KEYWORDS.put("void",  TokenType.TYPE_VOID);
         KEYWORDS.put("Array", TokenType.TYPE_ARRAY);
-        KEYWORDS.put("IO",    TokenType.TYPE_IO);
     }
 
     private final String source;
