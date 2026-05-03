@@ -19,7 +19,7 @@ public enum TokenType {
     KW_TRUE,        // true
     KW_FALSE,       // false
     KW_NIL,         // nil
-    KW_DIV,         // div
+    //KW_DIV,         // div - cambios en el manual
 
     //Tipos primitivos
     TYPE_INT,

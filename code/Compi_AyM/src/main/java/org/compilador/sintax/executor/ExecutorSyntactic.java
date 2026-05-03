@@ -13,7 +13,8 @@ public class ExecutorSyntactic {
 
     public static void main(String[] args) {
 
-        String sourceFile = "/home/aida/Documentos/Compi/prueba.txt";
+        //String sourceFile = "/home/aida/Documentos/Compi/prueba.txt";
+        String sourceFile = "C:/Users/Usuario/Documents/MARTI/prueba compi.txt";
         String source = readSourceFile(sourceFile);
 
         String result = runSyntacticAnalysis(source);
@@ -27,7 +28,7 @@ public class ExecutorSyntactic {
 
         try {
             parser.SynAnalyzer();
-            return "CORRECTO: ANALISIS SINTACTICO\nEl programa es sintacticamente valido.";
+            return "CORRECTO: ANALISIS SINTACTICO\n El programa es sintacticamente valido.";
 
         } catch (LexicalException e) {
             return e.formatError();

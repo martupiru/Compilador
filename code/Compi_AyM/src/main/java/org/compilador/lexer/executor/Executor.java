@@ -13,8 +13,8 @@ public class Executor {
 
    public static void main(String[] args) {
 
-       //String sourceFile = "C:/Users/Usuario/Documents/MARTI/prueba compi.txt";
-       String sourceFile = "/home/aida/Documentos/Compi/prueba.txt";
+       String sourceFile = "C:/Users/Usuario/Documents/MARTI/prueba compi.txt";
+       //String sourceFile = "/home/aida/Documentos/Compi/prueba.txt";
 
        String outputFile = null;
 

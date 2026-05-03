@@ -27,7 +27,7 @@ public class LexicalAnalyzer {
         KEYWORDS.put("true",   TokenType.KW_TRUE);
         KEYWORDS.put("false",  TokenType.KW_FALSE);
         KEYWORDS.put("nil",    TokenType.KW_NIL);
-        KEYWORDS.put("div",    TokenType.KW_DIV);
+        //KEYWORDS.put("div",    TokenType.KW_DIV); cambios en manual
         // TIPOS PRIMITIVOS
         KEYWORDS.put("Int",   TokenType.TYPE_INT);
         KEYWORDS.put("Str",   TokenType.TYPE_STR);
