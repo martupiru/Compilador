@@ -17,7 +17,6 @@ import java.nio.file.Paths;
  * Se cubren:
  *  Casos validos:tokens reconocidos correctamente "CORRECTO: ANALISIS LEXICO"
  *  Casos de error: LexicalException lanzada ante entrada invalida "ERROR: LEXICO"
- * Archivos fuente usados: ver carpeta /tc
  * @author Martina Nahman
  */
 
